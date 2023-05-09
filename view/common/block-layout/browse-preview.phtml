@@ -1,0 +1,39 @@
+<?php
+
+$translate = $this->plugin('translate');
+?>
+<div class="preview-block" id="preview">
+<img class="page2-background-image" src="<?php echo $this->assetUrl('images/Capture.JPG'); ?>" alt="">
+
+<ul class="resource-list preview" style="padding-left: 0px">
+<?php
+$headingTerm = $this->siteSetting('browse_heading_property_term');
+$bodyTerm = $this->siteSetting('browse_body_property_term');
+foreach ($this->resources as $resource):
+    $heading = $headingTerm ? $resource->value($headingTerm, ['default' => $translate('[Untitled]')]) : $resource->displayTitle();
+    $body = $bodyTerm ? $resource->value($bodyTerm) : $resource->itemCount();
+?>
+
+
+  <div class="card">
+      <a href="<?php echo $resource->url($heading); ?>">
+    <div>
+        <li class="<?php echo $this->resourceType; ?> resource">
+            <?php echo $this->thumbnail($resource, 'medium', ['title' => $heading]); ?>
+            <h4 style="text-align: center; color:white;"><?php echo $heading; ?></h4>
+            <?php if ($body): ?>
+              <div class="documentsnumber"><?php echo $body." documents"; ?>
+              </div>
+            <?php endif; ?>
+            <hr class="resource-line">
+            <p style="color:white"><?php echo $resource->displayDescription(); ?></p>
+        </li>
+      </div>
+        </a>
+      
+
+  </div>
+<?php endforeach; ?>
+</ul>
+</div>
+

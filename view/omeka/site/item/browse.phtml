@@ -1,0 +1,263 @@
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource browse');
+
+$query = $this->params()->fromQuery();
+$itemSetShow = isset($itemSet);
+if ($itemSetShow):
+  $this->htmlElement('body')->appendAttribute('class', 'item-set');
+  $query['item_set_id'] = $itemSet->id();
+endif;
+$sortHeadings = [
+  [
+    'label' => $translate('Title'),
+    'value' => 'dcterms:title'
+  ],
+  [
+    'label' => $translate('Creator'),
+    'value' => 'dcterms:creator'
+  ],
+  [
+    'label' => $translate('Date'),
+    'value' => 'dcterms:date'
+  ],
+  [
+    'label' => $translate('Created'),
+    'value' => 'created'
+  ],
+];
+$properties = ['dcterms:creator', 'dcterms:publisher', 'dcterms:language'];
+$unique_categories = [];
+foreach ($items as $item) {
+  foreach ($properties as $property) {
+    $category = $item->value($property);
+    if ($category && !in_array($category, $unique_categories)) {
+      $unique_categories[] = $category;
+    }
+  }
+}
+?>
+<?php if ($itemSetShow): ?>
+  <?php echo $this->pageTitle($itemSet->displayTitle(), 2) . "<br>"; ?>
+  <h3>
+    <?php //echo $translate('Item set'); ?>
+  </h3>
+  <!-- <div class="metadata">
+          <? php // echo $itemSet->displayValues(); ?>
+      </div> -->
+  <div class="item-set-items">
+    <?php //echo '<h3>' . $escape($translate('Items')) . '</h3>'; ?>
+  <?php else: ?>
+    <?php echo $this->pageTitle($translate('Items'), 2); ?>
+  <?php endif; ?>
+
+  <?php echo $this->searchFilters(); ?>
+  <div class="search-filters">
+    <div class="search-filter-bar">
+      <div>
+        <?php echo $this->partial('common/search-form'); ?>
+      </div>
+      <div>
+        <button class="filter-btn">Filtre</button>
+      </div>
+      <div>
+        <?php echo $this->sortSelector($sortHeadings); ?>
+      </div>
+    </div>
+    <div class="filter">
+      <div class="filter-dropdown">
+        <ul class="filter-list">
+          <?php foreach ($unique_categories as $category): ?>
+            <li data-property="<?php echo $category->property()->term(); ?>">
+              <input type="checkbox" id="<?php echo $category; ?>" name="<?php echo $category; ?>">
+              <label for="<?php echo $category; ?>"><?php echo $category; ?></label>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+        <button class="apply-btn">Appliquer</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="browse-controls">
+
+
+  </div>
+
+  <?php $this->trigger('view.browse.before'); ?>
+  <ul class="resource-list">
+    <?php
+    $headingTerm = $this->siteSetting('browse_heading_property_term');
+    $bodyTerm = $this->siteSetting('browse_body_property_term');
+    $properties = ['dcterms:creator', 'dcterms:publisher', 'dcterms:language']; foreach ($items as $item):
+      $heading = $headingTerm ? $item->value($headingTerm, ['default' => $translate('[Untitled]')]) : $item->displayTitle();
+      $body = $bodyTerm ? $item->value($bodyTerm) : $item->displayDescription();
+      ?>
+      <li class="item resource">
+        <a href=<?php echo $item->url() ?>>
+          <?php echo $this->thumbnail($item, 'medium'); ?>
+          <?php if (strlen($heading) >= 95): ?>
+            <br>
+            <span>
+              <b>
+                <?php echo substr($heading, 0, 95) . "..."; ?>
+              </b>
+            </span>
+            <br>
+          <?php else: ?>
+            <br>
+            <span>
+              <b>
+                <?php echo $heading; ?>
+              </b>
+            </span>
+            <br>
+          <?php endif; ?>
+
+          <?php if ($item->value('dcterms:creator')): ?>
+            <span><i class='fas fa-user-edit'></i>
+              <?php echo $item->value('dcterms:creator'); ?>
+            </span>
+          <?php endif; ?>
+          <?php if ($item->value('bibo:number')): ?>
+            <br><span><i class='fas fa-calendar'></i>N°
+              <?php echo $item->value('bibo:number'); ?>
+            </span>
+          <?php endif; ?>
+          <?php if ($item->value('dcterms:date')): ?>
+            <br><span><i class='fas fa-calendar-day'></i>
+              <?php echo $item->value('dcterms:date'); ?>
+            </span>
+          <?php endif; ?>
+          <?php if ($item->value('dcterms:publisher')): ?>
+            <br><span><i class='fas fa-book'></i>
+              <?php echo $item->value('dcterms:publisher'); ?>
+            </span>
+          <?php endif; ?>
+          <?php if ($item->value('dcterms:language')): ?>
+            <br><span><i class='far fa-comments'></i>
+              <?php echo $item->value('dcterms:language'); ?>
+            </span>
+          <?php endif; ?>
+        </a>
+      </li>
+    <?php endforeach; ?>
+
+  </ul>
+
+  <?php echo ($itemSetShow) ? '</div>' : ''; ?>
+  <?php $this->trigger('view.browse.after'); ?>
+  <script>
+    var properties = ['dcterms:creator', 'bibo:number', 'dcterms:date', 'dcterms:publisher', 'dcterms:language'];
+
+    if (window.location.href.includes("item-set")) {
+      document.body.style.backgroundColor = '#DDDDDD';
+    }
+    const items = <?php echo json_encode($items); ?>;
+    const filterBtn = document.querySelector('.filter-btn');
+    const filterDropdown = document.querySelector('.filter-dropdown');
+    console.log(items);
+    filterBtn.addEventListener('click', () => {
+      filterDropdown.classList.toggle('show');
+    });
+    document.querySelector('.apply-btn').addEventListener('click', function () {
+      var filters = getCheckedFilters();
+      console.log(filters)
+      var filteredItems = filterItems(items, filters);
+      console.log(filteredItems)
+      // Mettre à jour l'affichage des éléments filtrés
+      updateItemsList(filteredItems);
+    });
+
+    function getCheckedFilters() {
+    var filterElems = document.querySelectorAll('.filter-dropdown li');
+    var filters = [];
+    
+    filterElems.forEach(function(filterElem) {
+        var checkbox = filterElem.querySelector('input[type="checkbox"]');
+        if (checkbox.checked) {
+            filters.push({
+                property: filterElem.dataset.property,
+                value: checkbox.name
+            });
+        }
+    });
+
+    return filters;
+}
+
+function filterItems(items, filters) {
+    if (filters.length === 0) {
+        return items;
+    }
+
+    return items.filter(function(item) {
+        return filters.every(function(filter) {
+            return item[filter.property] && item[filter.property].some(function(valueObj) {
+                return valueObj['@value'] === filter.value;
+            });
+        });
+    });
+}
+
+function updateItemsList(filteredItems) {
+    var resourceList = document.querySelector('.resource-list');
+    resourceList.innerHTML = '';
+
+    filteredItems.forEach(function(item) {
+        var listItem = document.createElement('li');
+        listItem.classList.add('item', 'resource');
+
+        var itemId = item['@id'].split('/').pop();
+        var itemLink = document.createElement('a');
+        itemLink.href = 'http://51.254.121.152/s/bucullezzione/item/' + itemId;
+
+        var thumbnail = document.createElement('img');
+        thumbnail.src = item.thumbnail_display_urls.medium;
+        thumbnail.alt = '';
+        itemLink.appendChild(thumbnail);
+
+        var heading = item['dcterms:title'] ? item['dcterms:title'][0]['@value'] : '[Untitled]';
+        var headingEl = document.createElement('span');
+        headingEl.innerHTML = '<b>' + (heading.length >= 95 ? heading.substring(0, 95) + '...' : heading) + '</b>';
+        itemLink.appendChild(document.createElement('br'));
+        itemLink.appendChild(headingEl);
+
+        properties.forEach(function(property) {
+            if (item[property]) {
+                var valueEl = document.createElement('span');
+                valueEl.innerHTML = item[property][0]['@value'];
+
+                switch (property) {
+                    case 'dcterms:creator':
+                        valueEl.innerHTML = '<i class="fas fa-user-edit"></i> ' + valueEl.innerHTML;
+                        break;
+                    case 'bibo:number':
+                        valueEl.innerHTML = '<i class="fas fa-calendar"></i>N° ' + valueEl.innerHTML;
+                        break;
+                    case 'dcterms:date':
+                        valueEl.innerHTML = '<i class="fas fa-calendar-day"></i> ' + valueEl.innerHTML;
+                        break;
+                    case 'dcterms:publisher':
+                        valueEl.innerHTML = '<i class="fas fa-book"></i> ' + valueEl.innerHTML;
+                        break;
+                    case 'dcterms:language':
+                        valueEl.innerHTML = '<i class="far fa-comments"></i> ' + valueEl.innerHTML;
+                        break;
+                }
+
+                itemLink.appendChild(document.createElement('br'));
+                itemLink.appendChild(valueEl);
+            }
+        });
+
+        listItem.appendChild(itemLink);
+        resourceList.appendChild(listItem);
+    });
+}
+
+
+
+  </script>

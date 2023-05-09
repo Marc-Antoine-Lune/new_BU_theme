@@ -1,0 +1,81 @@
+<script>
+ window.onload = function(){
+    if(document.getElementById('similar')){
+	var a = document.createElement('a');
+	a.href = '#similar';
+	a.innerHTML = "<button class='button is-info'>Mots clés</button>";
+	document.getElementsByClassName("mediaNav")[0].append(a);
+    }
+    document.getElementById("more-info-btn").addEventListener("click", function () {
+    const informationSection = document.getElementById("information");
+    informationSection.scrollIntoView({ behavior: "smooth" });
+  });
+ };
+
+ 
+
+</script>
+<?php
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->htmlElement('body')->appendAttribute('class', 'item resource show');
+$embedMedia = $this->siteSetting('item_media_embed', false);
+$itemMedia = $item->media();
+?>
+
+<div class="pdf">
+  <?php echo $this->pageTitle($item->displayTitle(), 2); ?>
+  <button id="more-info-btn" class="button is-info">
+    <span style="margin-right: 10px;">Plus d'informations</span>
+    <i class="fas fa-chevron-down"></i>
+</button>
+
+  <?php if(count($itemMedia) > 1): ?>
+    <?php foreach ($itemMedia as $url): ?>
+      <iframe src="<?php echo $url->originalUrl(); ?>" height="700px" width="800px">
+     </iframe>
+    <?php endforeach;?>
+<?php else: ?>
+  <iframe src="<?php echo $itemMedia[0]->originalUrl(); ?>" height="700px" width="800px">
+ </iframe>
+<?php endif; ?>
+</div>
+<?php $this->trigger('view.show.before'); ?>
+<?php if ($embedMedia && $itemMedia): ?>
+    <div class="media-embeds">
+    <?php foreach ($itemMedia as $media):
+        echo $media->render();
+    endforeach;
+    ?>
+    </div>
+<?php endif; ?>
+<div id="information" class="information">
+<?php echo $item->displayValues(); ?>
+
+</div>
+
+<?php if (!$embedMedia && $itemMedia): ?>
+<div class="media-list">
+    <?php foreach ($itemMedia as $media): ?>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
+
+
+<?php
+$page = $this->params()->fromQuery('page', 1);
+$property = $this->params()->fromQuery('property');
+//$subjectValues = $item->displaySubjectValues($page, 25, $property);
+
+?>
+<?php if($subjectValues) : ?>
+
+<div id="item-linked">
+    <h3><?php echo $translate('Linked resources'); ?></h3>
+    <?php echo $subjectValues; ?>
+</div>
+<?php endif; ?>
+<?php $this->trigger('view.show.after'); ?>
+
+

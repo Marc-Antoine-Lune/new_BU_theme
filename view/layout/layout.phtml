@@ -1,0 +1,172 @@
+<?php
+$escape = $this->plugin('escapeHtml');
+$siteTitle = $site->title();
+$this->htmlElement('html')->setAttribute('lang', $this->lang());
+$this->headMeta()->setCharset('utf-8');
+$this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1');
+$this->headTitle($siteTitle)->setSeparator(' · ');
+$this->headTitle()->append($this->setting('installation_title', 'Omeka S'));
+$this->headLink()->prependStylesheet($this->assetUrl('css/style.css'));
+$this->headLink()->prependStylesheet($this->assetUrl('css/iconfonts.css', 'Omeka'));
+$this->headLink()->prependStylesheet('//fonts.googleapis.com/css?family=Open+Sans:400,400italic,600,600italic,700italic,700');
+$this->headScript()->prependFile($this->assetUrl('js/default.js'));
+$this->headScript()->prependFile($this->assetUrl('js/global.js', 'Omeka'));
+$this->headScript()->prependFile($this->assetUrl('vendor/jquery/jquery.min.js', 'Omeka'));
+$this->jsTranslate();
+$banner = $this->themeSettingAssetUrl('banner');
+$bannerHeight = $this->themeSetting('banner_height');
+$bannerHeightMobile = $this->themeSetting('banner_height_mobile');
+$bannerPosition = ($this->themeSetting('banner_position')) ? str_replace('_', '-', $this->themeSetting('banner_position')) : 'center';
+$this->trigger('view.layout');
+$userBar = $this->userBar();
+?>
+<?php echo $this->doctype(); ?>
+<?php echo $this->htmlElement('html'); ?>
+
+<head>
+    <?php echo $this->headMeta(); ?>
+    <?php echo $this->headTitle(); ?>
+    <?php echo $this->headLink(); ?>
+    <?php echo $this->headStyle(); ?>
+    <?php echo $this->headScript(); ?>
+
+    <style>
+        <?php if ($accentColor = $this->themeSetting('accent_color')): ?>
+            a:link,
+            a:visited {
+                color:
+                    <?php echo $accentColor; ?>
+            }
+
+            a:active,
+            a:hover {
+                color:
+                    <?php echo $accentColor; ?>
+                ;
+                opacity: .75;
+            }
+
+        <?php endif; ?>
+    </style>
+</head>
+
+<html lang="<?php echo $this->lang(); ?>">
+
+<body>
+    <div class="main-container">
+        <?php
+        $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        ?>
+        <?php if (str_contains($actual_link, "welcome")): ?>
+
+            <div class="page1">
+                <header>
+                    <div class="head">
+                        <div class="logoDiv">
+                            <img class="logo-responsive" src="<?php echo $this->themeSettingAssetUrl('logo'); ?>"
+                                alt="<?php echo $escape($siteTitle); ?>" />
+                        </div>
+                        <div class="site-title">
+                            <h1 style="font-size:30px">
+                                <a href="<?php echo $site->url(); ?>" class="site-title">
+                                    <?php echo $escape($siteTitle); ?>
+                                </a>
+                            </h1>
+                        </div>
+                    </div>
+                </header>
+                <div class="hero-container">
+                    <div class="text-container">
+                        <h3 class="animated-line">Bienvenue sur la bibliothèque patrimoniale numérique du SCDU de Corse</h3>
+                    </div>
+                    <div class="image-container">
+                        <img src="<?php echo $this->assetUrl('images/bu_old.png'); ?>" alt="">
+                    </div>
+                </div>
+                <div class="description">
+                    <p>
+                        <span class="animated-line">La Corse possède un patrimone écrit très riche qu'il est important de
+                            sauvegarder et de valoriser.</span>
+                        <span class="animated-line">Notre bibliothèque numérique a à coeur d'y contribuer en le diffusant
+                            largement. Les documents</span>
+                        <span class="animated-line">disponibles sur Digital cullezzione sont conservés à la Bibliothèque de
+                            l'université de Corse et à</span>
+                        <span class="animated-line">la Médiathèque territoriale de la Corse U Cismonte à Corte. Vous
+                            touverez uniquement des revues et</span>
+                        <span class="animated-line">des ouvrages imprimés.</span>
+                    </p>
+                </div>
+                <div class="scroll-icons">
+                    <div class="scroll-indicator">
+                        <div class="mouse">
+                            <div class="wheel"></div>
+                        </div>
+                    </div>
+                    <svg class="arrow" version="1.0" xmlns="http://www.w3.org/2000/svg" width="1280.000000pt"
+                        height="640.000000pt" viewBox="0 0 1280.000000 640.000000" preserveAspectRatio="xMidYMid meet">
+                        <g transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)" fill="#000000"
+                            stroke="none">
+                            <path d="M9280 5934 c-106 -21 -223 -80 -293 -150 -99 -97 -148 -196 -168
+-336 -10 -72 -9 -97 5 -164 22 -108 75 -212 144 -282 33 -33 391 -297 851
+-627 l794 -570 -5084 -5 c-4763 -5 -5087 -6 -5132 -22 -146 -52 -265 -152
+-330 -275 -114 -217 -77 -472 93 -644 70 -71 126 -108 217 -142 l58 -22 5078
+-5 5078 -5 -752 -615 c-414 -338 -776 -638 -804 -667 -29 -29 -68 -84 -89
+-125 -112 -224 -73 -470 105 -649 104 -105 233 -159 382 -159 99 0 186 22 270
+68 70 39 2847 2303 2942 2399 160 162 199 422 93 633 -46 94 -119 163 -324
+311 -1086 782 -2701 1940 -2747 1970 -83 54 -166 80 -272 84 -49 2 -101 1
+-115 -1z" />
+                        </g>
+                    </svg>
+                </div>
+
+                <div class="otherResources">
+    <span style="margin-left: 5%; color: #888888;"><b>Autres ressources sur la Corse</b></span>
+    <div class="scrolling-container">
+        <div class="partners">
+            <img src="<?php echo $this->assetUrl('images/bnf-logo.jpeg'); ?>">
+            <img src="<?php echo $this->assetUrl('images/gallica-logo.png'); ?>">
+            <img src="<?php echo $this->assetUrl('images/m3c-logo.png'); ?>">
+            <img src="<?php echo $this->assetUrl('images/collectivite-logo.png'); ?>">
+        </div>
+    </div>
+</div>
+
+            </div>
+        <?php endif; ?>
+
+        <div class="page2">
+            <div>
+
+                <nav>
+                    <?php
+                    echo $site->publicNav()->menu()->renderMenu(null, [
+                        'maxDepth' => $this->themeSetting('nav_depth') - 1
+                    ]);
+                    ?>
+                    <!--<div id="search" class="search-bar">
+                        <?php echo $this->partial('common/search-form'); ?>
+                    </div>-->
+                    <div id="content" role="main">
+                        <?php echo $this->content; ?>
+                    </div>
+            </div>
+
+        </div>
+
+
+</body>
+
+</html>
+
+<script>
+    if (window.location.href.includes("welcome")) {
+        var container = document.querySelector(".main-container");
+        console.log(container)
+        container.addEventListener("wheel", (e) => {
+            e.preventDefault();
+            container.scrollLeft += e.deltaY
+        })
+    }
+
+
+</script>
